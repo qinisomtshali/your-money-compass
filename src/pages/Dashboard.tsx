@@ -9,12 +9,12 @@ const COLORS = ['hsl(256,30%,52%)', 'hsl(152,60%,45%)', 'hsl(38,92%,50%)', 'hsl(
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, ease: [0.2, 0, 0, 1] } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, ease: [0.2, 0, 0, 1] as const } },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.2, 0, 0, 1] } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.2, 0, 0, 1] as const } },
 };
 
 const Dashboard = () => {
