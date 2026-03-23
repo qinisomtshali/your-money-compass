@@ -43,7 +43,12 @@ const CurrencyBulk = () => {
         amount: Number(amount),
         targetCurrencies: selected,
       });
-      setResults(Array.isArray(data) ? data : data.results || []);
+      const conversions = data.conversions || data.results || data || [];
+      setResults(conversions.map((c: any) => ({
+        currency: c.toCurrency || c.currency,
+        convertedAmount: c.convertedAmount,
+        rate: c.rate,
+      })));
     } catch { toast.error('Bulk conversion failed'); }
     setConverting(false);
   };

@@ -10,8 +10,7 @@ import { formatZAR } from '@/lib/api';
 import axios from 'axios';
 
 interface TaxBracket {
-  min: number;
-  max?: number | null;
+  range: string;
   rate: number;
 }
 
@@ -105,7 +104,7 @@ const TaxBrackets = () => {
               <TableBody>
                 {data.brackets.map((b, i) => (
                   <TableRow key={i}>
-                    <TableCell>{formatZAR(b.min)} – {b.max ? formatZAR(b.max) : '∞'}</TableCell>
+                    <TableCell>{b.range}</TableCell>
                     <TableCell className="text-right font-semibold">{b.rate}%</TableCell>
                   </TableRow>
                 ))}

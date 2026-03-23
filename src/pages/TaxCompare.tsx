@@ -20,10 +20,12 @@ interface Scenario {
 
 interface CompareResult {
   label: string;
-  grossIncome: number;
-  totalTax: number;
-  effectiveTaxRate: number;
-  monthlyNetIncome: number;
+  result: {
+    grossIncome: number;
+    taxAmount: number;
+    effectiveRate: number;
+    monthlyNetIncome: number;
+  };
 }
 
 const NAV = [
@@ -122,9 +124,9 @@ const TaxCompare = () => {
               <Card key={i}>
                 <CardContent className="p-4 text-center">
                   <p className="font-semibold mb-2">{r.label}</p>
-                  <p className="text-xs text-muted-foreground">Gross: {formatZAR(r.grossIncome)}</p>
-                  <p className="text-xs text-red-500 mt-1">Tax: {formatZAR(r.totalTax)} ({r.effectiveTaxRate?.toFixed(1)}%)</p>
-                  <p className="text-lg font-bold text-primary mt-2">{formatZAR(r.monthlyNetIncome)}/mo</p>
+                  <p className="text-xs text-muted-foreground">Gross: {formatZAR(r.result.grossIncome)}</p>
+                  <p className="text-xs text-red-500 mt-1">Tax: {formatZAR(r.result.taxAmount)} ({(r.result.effectiveRate ?? 0).toFixed(1)}%)</p>
+                  <p className="text-lg font-bold text-primary mt-2">{formatZAR(r.result.monthlyNetIncome)}/mo</p>
                 </CardContent>
               </Card>
             ))}
@@ -134,7 +136,7 @@ const TaxCompare = () => {
             <CardHeader><CardTitle className="text-lg">Monthly Net Income Comparison</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={results}>
+                <BarChart data={results.map(r => ({ label: r.label, monthlyNetIncome: r.result.monthlyNetIncome }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
                   <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />

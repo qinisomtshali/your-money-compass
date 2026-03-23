@@ -18,13 +18,13 @@ interface TaxResult {
   grossIncome: number;
   taxableIncome: number;
   retirementDeduction?: number;
-  totalTax: number;
-  effectiveTaxRate: number;
+  taxAmount: number;
+  effectiveRate: number;
   monthlyPaye: number;
   monthlyNetIncome: number;
-  rebatesApplied?: number;
+  rebates?: number;
   medicalAidCredits?: number;
-  brackets?: Array<{ min: number; max: number; rate: number; taxableInBracket: number; taxInBracket: number }>;
+  bracketBreakdown?: Array<{ bracketRange: string; rate: number; taxableInBracket: number; taxInBracket: number }>;
 }
 
 const NAV = [
@@ -37,15 +37,15 @@ const DONUT_COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
 
 const TaxResults = ({ result }: { result: TaxResult }) => {
   const donutData = [
-    { name: 'Tax', value: result.totalTax },
-    { name: 'Net Income', value: result.grossIncome - result.totalTax },
+    { name: 'Tax', value: result.taxAmount },
+    { name: 'Net Income', value: result.grossIncome - result.taxAmount },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 flex-wrap">
         {result.taxYear && <Badge variant="secondary">{result.taxYear}</Badge>}
-        <Badge variant="outline">{result.effectiveTaxRate?.toFixed(1)}% effective rate</Badge>
+        <Badge variant="outline">{result.effectiveRate?.toFixed(1)}% effective rate</Badge>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -54,14 +54,14 @@ const TaxResults = ({ result }: { result: TaxResult }) => {
         {result.retirementDeduction != null && (
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Retirement Deduction</p><p className="text-lg font-bold">{formatZAR(result.retirementDeduction)}</p></CardContent></Card>
         )}
-        <Card className="border-destructive/30"><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Tax</p><p className="text-2xl font-bold text-red-500">{formatZAR(result.totalTax)}</p></CardContent></Card>
+        <Card className="border-destructive/30"><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Tax</p><p className="text-2xl font-bold text-red-500">{formatZAR(result.taxAmount)}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Monthly PAYE</p><p className="text-lg font-bold">{formatZAR(result.monthlyPaye)}</p></CardContent></Card>
         <Card className="border-primary/30 bg-primary/5"><CardContent className="p-4"><p className="text-xs text-muted-foreground">Monthly Take-Home</p><p className="text-2xl font-bold text-primary">{formatZAR(result.monthlyNetIncome)}</p></CardContent></Card>
       </div>
 
-      {(result.rebatesApplied != null || result.medicalAidCredits != null) && (
+      {(result.rebates != null || result.medicalAidCredits != null) && (
         <div className="flex gap-4 flex-wrap text-sm">
-          {result.rebatesApplied != null && <p><span className="text-muted-foreground">Rebates:</span> <span className="font-medium">{formatZAR(result.rebatesApplied)}</span></p>}
+          {result.rebates != null && <p><span className="text-muted-foreground">Rebates:</span> <span className="font-medium">{formatZAR(result.rebates)}</span></p>}
           {result.medicalAidCredits != null && <p><span className="text-muted-foreground">Medical Aid Credits:</span> <span className="font-medium">{formatZAR(result.medicalAidCredits)}</span></p>}
         </div>
       )}
@@ -86,7 +86,7 @@ const TaxResults = ({ result }: { result: TaxResult }) => {
       </Card>
 
       {/* Brackets */}
-      {result.brackets && result.brackets.length > 0 && (
+      {result.bracketBreakdown && result.bracketBreakdown.length > 0 && (
         <Card>
           <CardHeader><CardTitle className="text-lg">Bracket Breakdown</CardTitle></CardHeader>
           <CardContent>
@@ -101,9 +101,9 @@ const TaxResults = ({ result }: { result: TaxResult }) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {result.brackets.map((b, i) => (
+                  {result.bracketBreakdown.map((b, i) => (
                     <TableRow key={i}>
-                      <TableCell>{formatZAR(b.min)} – {b.max ? formatZAR(b.max) : '∞'}</TableCell>
+                      <TableCell>{b.bracketRange}</TableCell>
                       <TableCell className="text-right">{b.rate}%</TableCell>
                       <TableCell className="text-right">{formatZAR(b.taxableInBracket)}</TableCell>
                       <TableCell className="text-right">{formatZAR(b.taxInBracket)}</TableCell>

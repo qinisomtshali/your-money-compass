@@ -14,7 +14,7 @@ interface Invoice {
   id: string;
   invoiceNumber: string;
   toName: string;
-  date: string;
+  issueDate: string;
   dueDate: string;
   total: number;
   status: string;
@@ -22,10 +22,10 @@ interface Invoice {
 
 interface InvoiceSummary {
   totalInvoices: number;
-  draft: number;
-  sent: number;
-  paid: number;
-  overdue: number;
+  draftCount: number;
+  sentCount: number;
+  paidCount: number;
+  overdueCount: number;
   totalOutstanding: number;
   totalPaid: number;
 }
@@ -84,7 +84,7 @@ const Invoices = () => {
       {/* Summary Cards */}
       {summary && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total</p><p className="text-2xl font-bold">{summary.totalInvoices}</p><div className="flex gap-2 mt-1 text-xs"><span className="text-muted-foreground">D:{summary.draft}</span><span className="text-blue-500">S:{summary.sent}</span><span className="text-green-500">P:{summary.paid}</span><span className="text-red-500">O:{summary.overdue}</span></div></CardContent></Card>
+          <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total</p><p className="text-2xl font-bold">{summary.totalInvoices}</p><div className="flex gap-2 mt-1 text-xs"><span className="text-muted-foreground">D:{summary.draftCount}</span><span className="text-blue-500">S:{summary.sentCount}</span><span className="text-green-500">P:{summary.paidCount}</span><span className="text-red-500">O:{summary.overdueCount}</span></div></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Outstanding</p><p className={`text-2xl font-bold ${summary.totalOutstanding > 0 ? 'text-red-500' : ''}`}>{formatZAR(summary.totalOutstanding)}</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Paid</p><p className="text-2xl font-bold text-green-500">{formatZAR(summary.totalPaid)}</p></CardContent></Card>
         </div>
@@ -132,7 +132,7 @@ const Invoices = () => {
                   <TableRow key={inv.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/invoices/${inv.id}`)}>
                     <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
                     <TableCell>{inv.toName}</TableCell>
-                    <TableCell className="hidden md:table-cell">{new Date(inv.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="hidden md:table-cell">{new Date(inv.issueDate).toLocaleDateString()}</TableCell>
                     <TableCell className="hidden md:table-cell">{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right font-semibold">{formatZAR(inv.total)}</TableCell>
                     <TableCell><Badge className={statusColor[inv.status] || ''} variant="outline">{inv.status}</Badge></TableCell>

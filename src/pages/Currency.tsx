@@ -16,8 +16,8 @@ interface SupportedCurrency {
 }
 
 interface ConvertResult {
-  from: string;
-  to: string;
+  fromCurrency: string;
+  toCurrency: string;
   amount: number;
   convertedAmount: number;
   rate: number;
@@ -50,7 +50,10 @@ const Currency = () => {
     const fetchCurrencies = async () => {
       try {
         const { data } = await api.get('/api/currency/supported');
-        setCurrencies(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        setCurrencies(list.map((c: string | SupportedCurrency) =>
+          typeof c === 'string' ? { code: c, name: c } : c
+        ));
       } catch { setCurrencies(POPULAR_TARGETS.map((c) => ({ code: c, name: c }))); }
       setLoadingCurrencies(false);
     };
@@ -136,9 +139,9 @@ const Currency = () => {
 
           {result && (
             <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
-              <p className="text-sm text-muted-foreground">{Number(result.amount).toLocaleString()} {result.from} =</p>
-              <p className="text-4xl font-bold mt-1">{Number(result.convertedAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {result.to}</p>
-              <p className="text-sm text-muted-foreground mt-2">Rate: 1 {result.from} = {result.rate?.toFixed(6)} {result.to}</p>
+              <p className="text-sm text-muted-foreground">{Number(result.amount).toLocaleString()} {result.fromCurrency} =</p>
+              <p className="text-4xl font-bold mt-1">{Number(result.convertedAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {result.toCurrency}</p>
+              <p className="text-sm text-muted-foreground mt-2">Rate: 1 {result.fromCurrency} = {result.rate?.toFixed(6)} {result.toCurrency}</p>
             </div>
           )}
         </CardContent>
