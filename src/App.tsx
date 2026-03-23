@@ -13,6 +13,19 @@ import Categories from "./pages/Categories";
 import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
 import Reports from "./pages/Reports";
+import Stocks from "./pages/Stocks";
+import StockWatchlist from "./pages/StockWatchlist";
+import Crypto from "./pages/Crypto";
+import CryptoDetail from "./pages/CryptoDetail";
+import CryptoWatchlist from "./pages/CryptoWatchlist";
+import Currency from "./pages/Currency";
+import CurrencyBulk from "./pages/CurrencyBulk";
+import Tax from "./pages/Tax";
+import TaxCompare from "./pages/TaxCompare";
+import TaxBrackets from "./pages/TaxBrackets";
+import Invoices from "./pages/Invoices";
+import InvoiceCreate from "./pages/InvoiceCreate";
+import InvoiceDetail from "./pages/InvoiceDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,11 +44,30 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            {/* Finance */}
             <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
             <Route path="/transactions" element={<ProtectedPage><Transactions /></ProtectedPage>} />
             <Route path="/categories" element={<ProtectedPage><Categories /></ProtectedPage>} />
             <Route path="/budgets" element={<ProtectedPage><Budgets /></ProtectedPage>} />
             <Route path="/reports" element={<ProtectedPage><Reports /></ProtectedPage>} />
+            {/* Stocks */}
+            <Route path="/stocks" element={<ProtectedPage><Stocks /></ProtectedPage>} />
+            <Route path="/stocks/watchlist" element={<ProtectedPage><StockWatchlist /></ProtectedPage>} />
+            {/* Crypto */}
+            <Route path="/crypto" element={<ProtectedPage><Crypto /></ProtectedPage>} />
+            <Route path="/crypto/watchlist" element={<ProtectedPage><CryptoWatchlist /></ProtectedPage>} />
+            <Route path="/crypto/:coinId" element={<ProtectedPage><CryptoDetail /></ProtectedPage>} />
+            {/* Currency */}
+            <Route path="/currency" element={<ProtectedPage><Currency /></ProtectedPage>} />
+            <Route path="/currency/bulk" element={<ProtectedPage><CurrencyBulk /></ProtectedPage>} />
+            {/* Tax */}
+            <Route path="/tax" element={<ProtectedPage><Tax /></ProtectedPage>} />
+            <Route path="/tax/compare" element={<ProtectedPage><TaxCompare /></ProtectedPage>} />
+            <Route path="/tax/brackets" element={<AppLayout><TaxBrackets /></AppLayout>} />
+            {/* Invoices */}
+            <Route path="/invoices" element={<ProtectedPage><Invoices /></ProtectedPage>} />
+            <Route path="/invoices/new" element={<ProtectedPage><InvoiceCreate /></ProtectedPage>} />
+            <Route path="/invoices/:id" element={<ProtectedPage><InvoiceDetail /></ProtectedPage>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
