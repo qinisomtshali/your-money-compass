@@ -13,6 +13,11 @@ import Categories from "./pages/Categories";
 import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
 import Reports from "./pages/Reports";
+import Savings from "./pages/Savings";
+import SavingsChallenges from "./pages/SavingsChallenges";
+import SavingsCalculator from "./pages/SavingsCalculator";
+import Achievements from "./pages/Achievements";
+import Leaderboard from "./pages/Leaderboard";
 import Stocks from "./pages/Stocks";
 import StockWatchlist from "./pages/StockWatchlist";
 import Crypto from "./pages/Crypto";
@@ -50,6 +55,13 @@ const App = () => (
             <Route path="/categories" element={<ProtectedPage><Categories /></ProtectedPage>} />
             <Route path="/budgets" element={<ProtectedPage><Budgets /></ProtectedPage>} />
             <Route path="/reports" element={<ProtectedPage><Reports /></ProtectedPage>} />
+            {/* Savings */}
+            <Route path="/savings" element={<ProtectedPage><Savings /></ProtectedPage>} />
+            <Route path="/savings/challenges" element={<ProtectedPage><SavingsChallenges /></ProtectedPage>} />
+            <Route path="/savings/calculator" element={<ProtectedPage><SavingsCalculator /></ProtectedPage>} />
+            {/* Gamification */}
+            <Route path="/achievements" element={<ProtectedPage><Achievements /></ProtectedPage>} />
+            <Route path="/leaderboard" element={<ProtectedPage><Leaderboard /></ProtectedPage>} />
             {/* Stocks */}
             <Route path="/stocks" element={<ProtectedPage><Stocks /></ProtectedPage>} />
             <Route path="/stocks/watchlist" element={<ProtectedPage><StockWatchlist /></ProtectedPage>} />
