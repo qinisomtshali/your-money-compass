@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, Tag, PiggyBank, BarChart3, LogOut, Menu, X, TrendingUp, Coins, Calculator, FileText } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, Tag, PiggyBank, BarChart3, LogOut, Menu, X, TrendingUp, Coins, Calculator, FileText, Trophy, Medal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -8,8 +8,9 @@ const financeItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { to: '/categories', label: 'Categories', icon: Tag },
-  { to: '/budgets', label: 'Budgets', icon: PiggyBank },
+  { to: '/budgets', label: 'Budgets', icon: BarChart3 },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/savings', label: 'Savings', icon: PiggyBank },
 ];
 
 const toolsItems = [
@@ -18,6 +19,11 @@ const toolsItems = [
   { to: '/currency', label: 'Currency', icon: ArrowLeftRight },
   { to: '/tax', label: 'Tax Calculator', icon: Calculator },
   { to: '/invoices', label: 'Invoices', icon: FileText },
+];
+
+const gamificationItems = [
+  { to: '/achievements', label: 'Achievements', icon: Trophy },
+  { to: '/leaderboard', label: 'Leaderboard', icon: Medal },
 ];
 
 const NavItems = ({ items, onClick }: { items: typeof financeItems; onClick?: () => void }) => (
@@ -48,6 +54,34 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const SidebarContent = ({ onNav }: { onNav?: () => void }) => (
+    <>
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+        <NavItems items={financeItems} onClick={onNav} />
+        <div className="pt-4 pb-2">
+          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Market & Tools</p>
+        </div>
+        <NavItems items={toolsItems} onClick={onNav} />
+        <div className="pt-4 pb-2">
+          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gamification</p>
+        </div>
+        <NavItems items={gamificationItems} onClick={onNav} />
+      </nav>
+      <div className="p-3 border-t border-border">
+        <div className="px-3 py-2 text-xs text-muted-foreground truncate">
+          {user?.firstName} {user?.lastName}
+        </div>
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-foreground transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Desktop sidebar */}
@@ -57,25 +91,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="text-primary">●</span> Ledger
           </h1>
         </div>
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-          <NavItems items={financeItems} />
-          <div className="pt-4 pb-2">
-            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Market & Tools</p>
-          </div>
-          <NavItems items={toolsItems} />
-        </nav>
-        <div className="p-3 border-t border-border">
-          <div className="px-3 py-2 text-xs text-muted-foreground truncate">
-            {user?.firstName} {user?.lastName}
-          </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-foreground transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </button>
-        </div>
+        <SidebarContent />
       </aside>
 
       {/* Mobile header */}
@@ -97,18 +113,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <h1 className="text-lg font-semibold"><span className="text-primary">●</span> Ledger</h1>
               <button onClick={() => setMobileOpen(false)}><X className="h-5 w-5 text-muted-foreground" /></button>
             </div>
-            <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-              <NavItems items={financeItems} onClick={() => setMobileOpen(false)} />
-              <div className="pt-4 pb-2">
-                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Market & Tools</p>
-              </div>
-              <NavItems items={toolsItems} onClick={() => setMobileOpen(false)} />
-            </nav>
-            <div className="p-3 border-t border-border">
-              <button onClick={logout} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent/50">
-                <LogOut className="h-4 w-4" /> Logout
-              </button>
-            </div>
+            <SidebarContent onNav={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
