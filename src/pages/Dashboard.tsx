@@ -1,151 +1,288 @@
 import { useEffect, useState } from 'react';
-import api, { formatZAR, type MonthlySummary, type CategoryBreakdown, type BudgetVsActual, type Transaction } from '@/lib/api';
+import api, { formatZAR } from '@/lib/api';
 import { CardSkeleton } from '@/components/Skeleton';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { TrendingUp, TrendingDown, PiggyBank, Percent, Flame, Lightbulb, Trophy, Target, Zap } from 'lucide-react';
+import { Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Link } from 'react-router-dom';
 
-const COLORS = ['hsl(256,30%,52%)', 'hsl(152,60%,45%)', 'hsl(38,92%,50%)', 'hsl(200,80%,50%)', 'hsl(340,65%,55%)', 'hsl(280,50%,55%)', 'hsl(170,60%,40%)'];
+interface DashboardData {
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  monthlySavings: number;
+  savingsRate: number;
+  totalPoints: number;
+  level: number;
+  tier: string;
+  currentStreak: number;
+  healthScore: number;
+  healthGrade: string;
+  recentActivity: { type: string; description: string; amount: number | null; points: number; timestamp: string }[];
+  dailyTip: { id: string; title: string; content: string; category: string; difficulty: string } | null;
+  totalSavingsGoalProgress: number;
+  activeSavingsGoals: number;
+  budgetsOnTrack: number;
+  totalBudgets: number;
+}
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08, ease: [0.2, 0, 0, 1] as const } },
+interface HealthData {
+  totalScore: number;
+  maxScore: number;
+  grade: string;
+  categories: { name: string; score: number; maxScore: number; status: string; tip: string }[];
+}
+
+interface DashboardProfile {
+  pointsToNextLevel: number;
+  totalPoints: number;
+  level: number;
+  tier: string;
+}
+
+const tierColors: Record<string, string> = {
+  Bronze: 'bg-amber-700/20 text-amber-400 border-amber-700/40',
+  Silver: 'bg-gray-500/20 text-gray-300 border-gray-500/40',
+  Gold: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/40',
+  Platinum: 'bg-purple-600/20 text-purple-300 border-purple-600/40',
+  Diamond: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.2, 0, 0, 1] as const } },
+const gradeColor = (score: number) => {
+  if (score >= 85) return 'hsl(152, 60%, 45%)';
+  if (score >= 70) return 'hsl(152, 50%, 50%)';
+  if (score >= 55) return 'hsl(48, 96%, 53%)';
+  if (score >= 35) return 'hsl(25, 95%, 53%)';
+  return 'hsl(0, 72%, 51%)';
+};
+
+const gradeText = (score: number) => {
+  if (score >= 85) return 'Excellent';
+  if (score >= 70) return 'Great';
+  if (score >= 55) return 'Good';
+  if (score >= 35) return 'Fair';
+  return 'Needs Work';
+};
+
+const containerV = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06, ease: [0.2, 0, 0, 1] as const } } };
+const itemV = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.2, 0, 0, 1] as const } } };
+
+const HealthGauge = ({ score, maxScore }: { score: number; maxScore: number }) => {
+  const pct = Math.min((score / maxScore) * 100, 100);
+  const color = gradeColor(score);
+  const circumference = 2 * Math.PI * 70;
+  const offset = circumference - (pct / 100) * circumference;
+
+  return (
+    <div className="relative w-48 h-48 mx-auto">
+      <svg viewBox="0 0 160 160" className="w-full h-full -rotate-90">
+        <circle cx="80" cy="80" r="70" fill="none" stroke="hsl(var(--secondary))" strokeWidth="10" />
+        <motion.circle
+          cx="80" cy="80" r="70" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
+          strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }} transition={{ duration: 1.2, ease: [0.2, 0, 0, 1] }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <motion.span className="text-4xl font-bold font-mono" style={{ color }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          {score}
+        </motion.span>
+        <span className="text-xs text-muted-foreground mt-1">/ {maxScore}</span>
+      </div>
+    </div>
+  );
 };
 
 const Dashboard = () => {
-  const now = new Date();
-  const [summary, setSummary] = useState<MonthlySummary | null>(null);
-  const [breakdown, setBreakdown] = useState<CategoryBreakdown[]>([]);
-  const [budgetVsActual, setBudgetVsActual] = useState<BudgetVsActual[]>([]);
-  const [recentTx, setRecentTx] = useState<Transaction[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [health, setHealth] = useState<HealthData | null>(null);
+  const [profile, setProfile] = useState<DashboardProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
     Promise.all([
-      api.get(`/api/reports/monthly-summary?month=${month}&year=${year}`),
-      api.get(`/api/reports/category-breakdown?month=${month}&year=${year}`),
-      api.get(`/api/reports/budget-vs-actual?month=${month}&year=${year}`),
-      api.get(`/api/transactions?page=1&pageSize=5`),
-    ]).then(([s, b, bva, tx]) => {
-      setSummary(s.data);
-      setBreakdown(b.data);
-      setBudgetVsActual(bva.data);
-      setRecentTx(tx.data.items || tx.data);
-    }).catch(() => {}).finally(() => setLoading(false));
+      api.get('/api/dashboard').catch(() => ({ data: null })),
+      api.get('/api/dashboard/health').catch(() => ({ data: null })),
+      api.get('/api/dashboard/profile').catch(() => ({ data: null })),
+    ]).then(([d, h, p]) => {
+      setData(d.data);
+      setHealth(h.data);
+      setProfile(p.data);
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CardSkeleton /><CardSkeleton /><CardSkeleton />
-        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"><CardSkeleton /><CardSkeleton /></div>
       </div>
     );
   }
 
-  const summaryCards = [
-    { label: 'Total Income', value: summary?.totalIncome ?? 0, icon: TrendingUp, color: 'text-success' },
-    { label: 'Total Expenses', value: summary?.totalExpenses ?? 0, icon: TrendingDown, color: 'text-destructive' },
-    { label: 'Net Amount', value: summary?.netAmount ?? 0, icon: Wallet, color: (summary?.netAmount ?? 0) >= 0 ? 'text-success' : 'text-destructive' },
+  const stats = [
+    { label: 'Monthly Income', value: data?.monthlyIncome ?? 0, icon: TrendingUp, cls: 'text-success' },
+    { label: 'Monthly Expenses', value: data?.monthlyExpenses ?? 0, icon: TrendingDown, cls: 'text-destructive' },
+    { label: 'Monthly Savings', value: data?.monthlySavings ?? 0, icon: PiggyBank, cls: 'text-primary' },
+  ];
+
+  const savingsRate = data?.savingsRate ?? 0;
+  const totalPts = profile?.totalPoints ?? data?.totalPoints ?? 0;
+  const level = profile?.level ?? data?.level ?? 1;
+  const tier = profile?.tier ?? data?.tier ?? 'Bronze';
+  const streak = data?.currentStreak ?? 0;
+  const ptsToNext = profile?.pointsToNextLevel ?? 100;
+  const ptsProgress = Math.min((totalPts / (totalPts + ptsToNext)) * 100, 100);
+
+  const healthScore = health?.totalScore ?? data?.healthScore ?? 0;
+  const healthMax = health?.maxScore ?? 100;
+
+  const donutData = [
+    { name: 'Score', value: healthScore },
+    { name: 'Remaining', value: healthMax - healthScore },
   ];
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8">
-      <motion.h1 variants={itemVariants} className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</motion.h1>
+    <motion.div variants={containerV} initial="hidden" animate="visible" className="space-y-6">
+      <motion.h1 variants={itemV} className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</motion.h1>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {summaryCards.map((card) => (
-          <motion.div key={card.label} variants={itemVariants} className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{card.label}</span>
-              <card.icon className={`h-4 w-4 ${card.color}`} />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map((s) => (
+          <motion.div key={s.label} variants={itemV} className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground">{s.label}</span>
+              <s.icon className={`h-4 w-4 ${s.cls}`} />
             </div>
-            <p className={`text-3xl font-semibold font-mono tabular-nums mt-2 ${card.color}`}>
-              {formatZAR(card.value)}
-            </p>
+            <p className={`text-2xl font-semibold font-mono tabular-nums ${s.cls}`}>{formatZAR(s.value)}</p>
           </motion.div>
         ))}
+        <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground">Savings Rate</span>
+            <Percent className="h-4 w-4 text-primary" />
+          </div>
+          <p className="text-2xl font-semibold font-mono tabular-nums text-primary">{savingsRate.toFixed(1)}%</p>
+        </motion.div>
       </div>
 
-      {/* Charts */}
+      {/* Gamification Bar */}
+      <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <Badge variant="secondary" className="font-mono">Level {level}</Badge>
+          <Badge className={`border ${tierColors[tier] || tierColors.Bronze}`}>{tier}</Badge>
+          <span className="text-sm font-mono text-foreground"><Zap className="inline h-3.5 w-3.5 text-primary mr-1" />{totalPts} pts</span>
+          {streak > 0 && <span className="text-sm">🔥 {streak} day streak</span>}
+        </div>
+        <div className="flex items-center gap-3">
+          <Progress value={ptsProgress} className="flex-1 h-2" />
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{ptsToNext} pts to next level</span>
+        </div>
+      </motion.div>
+
+      {/* Health Score + Daily Tip Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pie Chart */}
-        <motion.div variants={itemVariants} className="rounded-xl border border-border bg-card p-6">
-          <h2 className="text-sm font-medium text-muted-foreground mb-4">Spending by Category</h2>
-          {breakdown.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-12 text-center">No spending data for this month.</p>
-          ) : (
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width="50%" height={200}>
-                <PieChart>
-                  <Pie data={breakdown} dataKey="amount" nameKey="categoryName" cx="50%" cy="50%" outerRadius={80} strokeWidth={0}>
-                    {breakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-2">
-                {breakdown.map((item, i) => (
-                  <div key={item.categoryId} className="flex items-center gap-2 text-sm">
-                    <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-muted-foreground flex-1 truncate">{item.categoryName}</span>
-                    <span className="font-mono tabular-nums text-foreground">{item.percentage.toFixed(0)}%</span>
+        {/* Health Score */}
+        <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-6">
+          <h2 className="text-sm font-medium text-muted-foreground mb-4">Financial Health Score</h2>
+          <HealthGauge score={healthScore} maxScore={healthMax} />
+          <p className="text-center mt-2 text-sm font-medium" style={{ color: gradeColor(healthScore) }}>
+            {health?.grade || gradeText(healthScore)}
+          </p>
+          {health?.categories && (
+            <div className="mt-5 space-y-3">
+              {health.categories.map((cat) => (
+                <div key={cat.name} className="group">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">{cat.name}</span>
+                    <span className="font-mono text-foreground">{cat.score}/{cat.maxScore}</span>
                   </div>
-                ))}
-              </div>
+                  <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <motion.div className="h-full rounded-full" style={{ backgroundColor: gradeColor((cat.score / cat.maxScore) * 100) }}
+                      initial={{ width: 0 }} animate={{ width: `${(cat.score / cat.maxScore) * 100}%` }}
+                      transition={{ duration: 0.8, ease: [0.2, 0, 0, 1] }} />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">{cat.tip}</p>
+                </div>
+              ))}
             </div>
           )}
         </motion.div>
 
-        {/* Bar Chart */}
-        <motion.div variants={itemVariants} className="rounded-xl border border-border bg-card p-6">
-          <h2 className="text-sm font-medium text-muted-foreground mb-4">Budget vs Actual</h2>
-          {budgetVsActual.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-12 text-center">No budgets set for this month.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={budgetVsActual} barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(240,4%,16%)" />
-                <XAxis dataKey="categoryName" tick={{ fontSize: 11, fill: 'hsl(240,5%,45%)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'hsl(240,5%,45%)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `R${(v/1000).toFixed(0)}k`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(240,4%,10%)', border: '1px solid hsl(240,4%,16%)', borderRadius: '8px', fontSize: 12 }}
-                  labelStyle={{ color: 'hsl(240,5%,96%)' }}
-                  formatter={(value: number) => formatZAR(value)}
-                />
-                <Bar dataKey="budgetAmount" name="Budget" fill="hsl(256,30%,52%)" radius={[4,4,0,0]} />
-                <Bar dataKey="actualAmount" name="Actual" fill="hsl(152,60%,45%)" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Right Column: Tip + Mini Cards */}
+        <div className="space-y-6">
+          {/* Daily Tip */}
+          {data?.dailyTip && (
+            <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-medium text-foreground">{data.dailyTip.title}</h3>
+                    <Badge variant="outline" className="text-[10px]">{data.dailyTip.category}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">{data.dailyTip.difficulty}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{data.dailyTip.content}</p>
+                </div>
+              </div>
+            </motion.div>
           )}
-        </motion.div>
+
+          {/* Mini Cards Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="h-4 w-4 text-primary" />
+                <span className="text-xs text-muted-foreground">Budgets</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">
+                {data?.budgetsOnTrack ?? 0}<span className="text-muted-foreground font-normal text-sm"> / {data?.totalBudgets ?? 0}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">on track</p>
+            </motion.div>
+
+            <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <PiggyBank className="h-4 w-4 text-success" />
+                <span className="text-xs text-muted-foreground">Savings Goals</span>
+              </div>
+              <p className="text-lg font-semibold text-foreground">{data?.activeSavingsGoals ?? 0} <span className="text-muted-foreground font-normal text-sm">active</span></p>
+              <div className="mt-2">
+                <Progress value={data?.totalSavingsGoalProgress ?? 0} className="h-1.5" />
+                <span className="text-[10px] text-muted-foreground mt-1">{(data?.totalSavingsGoalProgress ?? 0).toFixed(0)}% overall</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* Recent Transactions */}
-      <motion.div variants={itemVariants} className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-sm font-medium text-muted-foreground mb-4">Recent Transactions</h2>
-        {recentTx.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">No transactions found. A fresh start.</p>
+      {/* Recent Activity */}
+      <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-muted-foreground">Recent Activity</h2>
+          <Link to="/achievements" className="text-xs text-primary hover:underline">View Achievements →</Link>
+        </div>
+        {(!data?.recentActivity || data.recentActivity.length === 0) ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">No recent activity. Start tracking to earn points! 🚀</p>
         ) : (
           <div className="space-y-1">
-            {recentTx.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-secondary/30 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{tx.description}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(tx.date).toLocaleDateString('en-ZA')} · {tx.category?.name || tx.categoryName || ''}</p>
+            {data.recentActivity.slice(0, 8).map((a, i) => (
+              <div key={i} className="flex items-center justify-between py-2.5 px-2 rounded-lg hover:bg-secondary/30 transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Zap className="h-3 w-3 text-primary" />
+                  </div>
+                  <span className="text-sm text-foreground truncate">{a.description}</span>
                 </div>
-                <span className={`font-mono tabular-nums text-sm font-medium ${tx.type === 1 ? 'text-success' : 'text-foreground'}`}>
-                  {tx.type === 1 ? '+' : '-'}{formatZAR(tx.amount)}
-                </span>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-mono text-success">+{a.points}</span>
+                  <span className="text-[10px] text-muted-foreground">{new Date(a.timestamp).toLocaleDateString('en-ZA')}</span>
+                </div>
               </div>
             ))}
           </div>
