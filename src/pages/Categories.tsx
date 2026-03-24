@@ -5,12 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Plus, Pencil, Trash2, LayoutGrid } from 'lucide-react';
 import { TableSkeleton } from '@/components/Skeleton';
 import CategoryTemplates from '@/components/CategoryTemplates';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -23,6 +26,7 @@ const Categories = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState({ name: '', type: '0', icon: '📁' });
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -102,8 +106,27 @@ const Categories = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Icon (emoji)</Label>
-                    <Input value={form.icon} onChange={(e) => setForm(f => ({ ...f, icon: e.target.value }))} className="bg-secondary/50 border-border" />
+                    <Label>Icon</Label>
+                    <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" type="button" className="w-full justify-start bg-secondary/50 border-border text-left font-normal">
+                          <span className="text-xl mr-2">{form.icon}</span>
+                          <span className="text-muted-foreground">Pick an emoji</span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-border" align="start">
+                        <Picker
+                          data={data}
+                          onEmojiSelect={(emoji: { native: string }) => {
+                            setForm(f => ({ ...f, icon: emoji.native }));
+                            setEmojiOpen(false);
+                          }}
+                          theme="dark"
+                          previewPosition="none"
+                          skinTonePosition="search"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Button type="submit" className="w-full">{editing ? 'Update' : 'Create'}</Button>
                 </form>

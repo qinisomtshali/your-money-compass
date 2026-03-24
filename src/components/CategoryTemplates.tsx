@@ -6,7 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import {
+  Loader2, Rocket, Package, Briefcase, GraduationCap,
+  ShoppingCart, Coffee, Landmark, BookOpen, Car, Home, Heart, MoreHorizontal, Wallet,
+} from 'lucide-react';
 
 interface TemplateCategory {
   name: string;
@@ -28,11 +31,23 @@ interface Pack {
 
 type Packs = Record<string, Pack>;
 
-const PACK_EMOJIS: Record<string, string> = {
-  starter: '🚀',
-  complete: '📦',
-  freelancer: '💼',
-  student: '🎓',
+const PACK_ICONS: Record<string, React.ReactNode> = {
+  starter: <Rocket className="h-7 w-7 text-primary" />,
+  complete: <Package className="h-7 w-7 text-primary" />,
+  freelancer: <Briefcase className="h-7 w-7 text-primary" />,
+  student: <GraduationCap className="h-7 w-7 text-primary" />,
+};
+
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  Essentials: <ShoppingCart className="h-4 w-4 text-muted-foreground" />,
+  Lifestyle: <Coffee className="h-4 w-4 text-muted-foreground" />,
+  Financial: <Landmark className="h-4 w-4 text-muted-foreground" />,
+  'Education & Growth': <BookOpen className="h-4 w-4 text-muted-foreground" />,
+  Transport: <Car className="h-4 w-4 text-muted-foreground" />,
+  Home: <Home className="h-4 w-4 text-muted-foreground" />,
+  Giving: <Heart className="h-4 w-4 text-muted-foreground" />,
+  Other: <MoreHorizontal className="h-4 w-4 text-muted-foreground" />,
+  Income: <Wallet className="h-4 w-4 text-muted-foreground" />,
 };
 
 interface CategoryTemplatesProps {
@@ -117,6 +132,14 @@ const CategoryTemplates = ({ existingCategories, onApplied }: CategoryTemplatesP
 
   const packOrder = ['starter', 'complete', 'freelancer', 'student'];
 
+  // Build a name→icon lookup from all template groups
+  const iconByName: Record<string, string> = {};
+  for (const group of groups) {
+    for (const cat of group.categories) {
+      iconByName[cat.name] = cat.icon;
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* Pack Selection */}
@@ -127,13 +150,30 @@ const CategoryTemplates = ({ existingCategories, onApplied }: CategoryTemplatesP
             const pack = packs[key];
             if (!pack) return null;
             return (
-              <Card key={key} className="border-border bg-card">
-                <CardHeader className="pb-3">
-                  <div className="text-3xl mb-1">{PACK_EMOJIS[key]}</div>
+              <Card key={key} className="border-border bg-card flex flex-col">
+                <CardHeader className="pb-3 flex-1">
+                  <div className="mb-1">{PACK_ICONS[key]}</div>
                   <CardTitle className="text-base">{pack.name}</CardTitle>
                   <CardDescription>{pack.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-1">
+                    {pack.categories.slice(0, 8).map((name) => (
+                      <span
+                        key={name}
+                        className="inline-flex items-center gap-1 rounded-md bg-secondary/50 px-1.5 py-0.5 text-xs text-muted-foreground"
+                        title={name}
+                      >
+                        <span>{iconByName[name] || '📁'}</span>
+                        <span className="truncate max-w-[5rem]">{name}</span>
+                      </span>
+                    ))}
+                    {pack.categories.length > 8 && (
+                      <span className="inline-flex items-center rounded-md bg-secondary/50 px-1.5 py-0.5 text-xs text-muted-foreground">
+                        +{pack.categories.length - 8} more
+                      </span>
+                    )}
+                  </div>
                   <Button
                     className="w-full"
                     size="sm"
@@ -168,6 +208,7 @@ const CategoryTemplates = ({ existingCategories, onApplied }: CategoryTemplatesP
               <AccordionItem key={group.group} value={group.group}>
                 <AccordionTrigger className="px-4 hover:no-underline">
                   <div className="flex items-center gap-2">
+                    {GROUP_ICONS[group.group]}
                     <span className="font-medium">{group.group}</span>
                     <Badge variant="secondary" className="text-xs">
                       {group.categories.length}
