@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Joyride, STATUS, type EventData, type Step } from 'react-joyride';
+import { Joyride, STATUS, type Step } from 'react-joyride';
 import { useLocation } from 'react-router-dom';
 
 const TOUR_STEPS: Step[] = [
@@ -11,7 +11,7 @@ const TOUR_STEPS: Step[] = [
   },
   {
     target: '[data-tour="stats"]',
-    content: 'Your monthly snapshot — income, expenses, savings, and savings rate at a glance.',
+    content: 'Your monthly snapshot — income, expenses, savings, and savings rate at a glance. Numbers animate in as data loads!',
     skipBeacon: true,
   },
   {
@@ -31,7 +31,7 @@ const TOUR_STEPS: Step[] = [
   },
   {
     target: 'nav',
-    content: 'Use the sidebar to explore Transactions, Budgets, Savings, Stocks, Crypto, and more. Enjoy! 🎉',
+    content: 'Use the sidebar to explore all modules. Pro tip: press ⌘K (or Ctrl+K) to quickly jump anywhere! 🎉',
     placement: 'right' as const,
     skipBeacon: true,
   },
@@ -46,12 +46,12 @@ const AppTour = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('tour') === '1' && !localStorage.getItem(TOUR_KEY)) {
-      const t = setTimeout(() => setRun(true), 800);
+      const t = setTimeout(() => setRun(true), 1000);
       return () => clearTimeout(t);
     }
   }, [location.search]);
 
-  const handleEvent = useCallback((data: EventData) => {
+  const handleEvent = useCallback((data: { status: string }) => {
     if (data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED) {
       setRun(false);
       localStorage.setItem(TOUR_KEY, '1');
@@ -69,11 +69,11 @@ const AppTour = () => {
       scrollToFirstStep
       onEvent={handleEvent}
       options={{
-        primaryColor: 'hsl(262, 83%, 58%)',
+        primaryColor: 'hsl(256, 30%, 52%)',
         zIndex: 10000,
-        arrowColor: 'hsl(240, 10%, 10%)',
-        backgroundColor: 'hsl(240, 10%, 10%)',
-        textColor: 'hsl(0, 0%, 95%)',
+        arrowColor: 'hsl(240, 4%, 10%)',
+        backgroundColor: 'hsl(240, 4%, 10%)',
+        textColor: 'hsl(240, 5%, 96%)',
         showProgress: true,
       }}
       locale={{

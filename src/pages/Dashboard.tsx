@@ -7,6 +7,7 @@ import { Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell } from '
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
+import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 
 interface DashboardData {
   monthlyIncome: number;
@@ -95,6 +96,32 @@ const HealthGauge = ({ score, maxScore }: { score: number; maxScore: number }) =
   );
 };
 
+const AnimatedStatCard = ({ label, value, icon: Icon, cls }: { label: string; value: number; icon: React.ElementType; cls: string }) => {
+  const animated = useAnimatedNumber(value);
+  return (
+    <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <Icon className={`h-4 w-4 ${cls}`} />
+      </div>
+      <p className={`text-2xl font-semibold font-mono tabular-nums ${cls}`}>{formatZAR(animated)}</p>
+    </motion.div>
+  );
+};
+
+const AnimatedRateCard = ({ rate }: { rate: number }) => {
+  const animated = useAnimatedNumber(rate);
+  return (
+    <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-muted-foreground">Savings Rate</span>
+        <Percent className="h-4 w-4 text-primary" />
+      </div>
+      <p className="text-2xl font-semibold font-mono tabular-nums text-primary">{animated.toFixed(1)}%</p>
+    </motion.div>
+  );
+};
+
 const Dashboard = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
@@ -152,21 +179,9 @@ const Dashboard = () => {
       {/* Quick Stats */}
       <div data-tour="stats" className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => (
-          <motion.div key={s.label} variants={itemV} className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground">{s.label}</span>
-              <s.icon className={`h-4 w-4 ${s.cls}`} />
-            </div>
-            <p className={`text-2xl font-semibold font-mono tabular-nums ${s.cls}`}>{formatZAR(s.value)}</p>
-          </motion.div>
+          <AnimatedStatCard key={s.label} label={s.label} value={s.value} icon={s.icon} cls={s.cls} />
         ))}
-        <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground">Savings Rate</span>
-            <Percent className="h-4 w-4 text-primary" />
-          </div>
-          <p className="text-2xl font-semibold font-mono tabular-nums text-primary">{savingsRate.toFixed(1)}%</p>
-        </motion.div>
+        <AnimatedRateCard rate={savingsRate} />
       </div>
 
       {/* Gamification Bar */}
