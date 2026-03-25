@@ -32,6 +32,7 @@ import Invoices from "./pages/Invoices";
 import InvoiceCreate from "./pages/InvoiceCreate";
 import InvoiceDetail from "./pages/InvoiceDetail";
 import NotFound from "./pages/NotFound";
+import AppTour from "./components/AppTour";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AppTour />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
