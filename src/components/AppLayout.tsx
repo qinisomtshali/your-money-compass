@@ -67,8 +67,16 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <NavItems items={gamificationItems} onClick={onNav} />
       </nav>
-      <div className="p-3 border-t border-border">
-        <div className="px-3 py-2 text-xs text-muted-foreground truncate">
+      <div className="p-3 border-t border-border space-y-1">
+        <button
+          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground transition-colors"
+        >
+          <span className="flex-1 text-left">Quick jump</span>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
           {user?.firstName} {user?.lastName}
         </div>
         <button
