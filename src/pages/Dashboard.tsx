@@ -150,7 +150,7 @@ const Dashboard = () => {
       <motion.h1 variants={itemV} className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</motion.h1>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div data-tour="stats" className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => (
           <motion.div key={s.label} variants={itemV} className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between mb-2">
@@ -170,7 +170,7 @@ const Dashboard = () => {
       </div>
 
       {/* Gamification Bar */}
-      <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+      <motion.div data-tour="gamification" variants={itemV} className="rounded-xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <Badge variant="secondary" className="font-mono">Level {level}</Badge>
           <Badge className={`border ${tierColors[tier] || tierColors.Bronze}`}>{tier}</Badge>
@@ -186,7 +186,7 @@ const Dashboard = () => {
       {/* Health Score + Daily Tip Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Health Score */}
-        <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-6">
+        <motion.div data-tour="health" variants={itemV} className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Financial Health Score</h2>
           <HealthGauge score={healthScore} maxScore={healthMax} />
           <p className="text-center mt-2 text-sm font-medium" style={{ color: gradeColor(healthScore) }}>
@@ -262,7 +262,7 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity */}
-      <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-6">
+      <motion.div data-tour="activity" variants={itemV} className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-muted-foreground">Recent Activity</h2>
           <Link to="/achievements" className="text-xs text-primary hover:underline">View Achievements →</Link>
