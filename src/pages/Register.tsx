@@ -23,8 +23,16 @@ const Register = () => {
     try {
       const { data } = await api.post('/api/auth/register', form);
       login(data.token, data.user);
+      // Auto-seed starter categories so the user isn't staring at an empty screen
+      try {
+        await api.post('/api/categories/templates/apply-pack/starter', {}, {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+      } catch {
+        // Non-critical — don't block registration
+      }
       toast.success('Account created!');
-      navigate('/');
+      navigate('/?tour=1');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
