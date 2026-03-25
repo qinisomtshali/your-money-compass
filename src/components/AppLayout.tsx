@@ -77,6 +77,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             ⌘K
           </kbd>
         </button>
+        <div className="px-3 py-2 text-xs text-muted-foreground truncate">
           {user?.firstName} {user?.lastName}
         </div>
         <button
