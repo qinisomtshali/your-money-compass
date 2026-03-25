@@ -96,6 +96,32 @@ const HealthGauge = ({ score, maxScore }: { score: number; maxScore: number }) =
   );
 };
 
+const AnimatedStatCard = ({ label, value, icon: Icon, cls }: { label: string; value: number; icon: React.ElementType; cls: string }) => {
+  const animated = useAnimatedNumber(value);
+  return (
+    <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <Icon className={`h-4 w-4 ${cls}`} />
+      </div>
+      <p className={`text-2xl font-semibold font-mono tabular-nums ${cls}`}>{formatZAR(animated)}</p>
+    </motion.div>
+  );
+};
+
+const AnimatedRateCard = ({ rate }: { rate: number }) => {
+  const animated = useAnimatedNumber(rate);
+  return (
+    <motion.div variants={itemV} className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-muted-foreground">Savings Rate</span>
+        <Percent className="h-4 w-4 text-primary" />
+      </div>
+      <p className="text-2xl font-semibold font-mono tabular-nums text-primary">{animated.toFixed(1)}%</p>
+    </motion.div>
+  );
+};
+
 const Dashboard = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);

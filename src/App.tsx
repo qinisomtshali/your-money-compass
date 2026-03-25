@@ -33,6 +33,7 @@ import InvoiceCreate from "./pages/InvoiceCreate";
 import InvoiceDetail from "./pages/InvoiceDetail";
 import NotFound from "./pages/NotFound";
 import AppTour from "./components/AppTour";
+import CommandPalette from "./components/CommandPalette";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AppTour />
+          <CommandPalette />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
