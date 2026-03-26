@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, Tag, PiggyBank, BarChart3, LogOut, Menu, X, TrendingUp, Coins, Calculator, FileText, Trophy, Medal } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, Tag, PiggyBank, BarChart3, LogOut, Menu, X, TrendingUp, Coins, Calculator, FileText, Trophy, Medal, Flag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ const financeItems = [
   { to: '/budgets', label: 'Budgets', icon: BarChart3 },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/savings', label: 'Savings', icon: PiggyBank },
+  { to: '/debts', label: 'Debts', icon: Flag },
 ];
 
 const toolsItems = [

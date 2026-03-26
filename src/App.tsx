@@ -31,6 +31,11 @@ import TaxBrackets from "./pages/TaxBrackets";
 import Invoices from "./pages/Invoices";
 import InvoiceCreate from "./pages/InvoiceCreate";
 import InvoiceDetail from "./pages/InvoiceDetail";
+import Debts from "./pages/Debts";
+import DebtCreate from "./pages/DebtCreate";
+import DebtDetail from "./pages/DebtDetail";
+import DebtPayoff from "./pages/DebtPayoff";
+import DebtInsights from "./pages/DebtInsights";
 import NotFound from "./pages/NotFound";
 import AppTour from "./components/AppTour";
 import CommandPalette from "./components/CommandPalette";
@@ -84,6 +89,12 @@ const App = () => (
             <Route path="/invoices" element={<ProtectedPage><Invoices /></ProtectedPage>} />
             <Route path="/invoices/new" element={<ProtectedPage><InvoiceCreate /></ProtectedPage>} />
             <Route path="/invoices/:id" element={<ProtectedPage><InvoiceDetail /></ProtectedPage>} />
+            {/* Debts */}
+            <Route path="/debts" element={<ProtectedPage><Debts /></ProtectedPage>} />
+            <Route path="/debts/new" element={<ProtectedPage><DebtCreate /></ProtectedPage>} />
+            <Route path="/debts/payoff" element={<ProtectedPage><DebtPayoff /></ProtectedPage>} />
+            <Route path="/debts/insights" element={<ProtectedPage><DebtInsights /></ProtectedPage>} />
+            <Route path="/debts/:id" element={<ProtectedPage><DebtDetail /></ProtectedPage>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
