@@ -99,6 +99,7 @@ const DebtDetail = () => {
       });
       const data = res.data;
       if (data.debtPaidOff) {
+        fireConfetti();
         toast({ title: `🎉 You paid off ${debt!.name}!`, description: `+${data.pointsEarned} points earned!` });
       } else {
         toast({ title: 'Payment logged!', description: `+${data.pointsEarned} points. Balance: ${formatZAR(data.newBalance)}` });
@@ -126,6 +127,7 @@ const DebtDetail = () => {
   const markPaidOff = async () => {
     try {
       await api.patch(`/api/debts/${id}/status`, { status: 'PaidOff' });
+      fireConfetti();
       toast({ title: `🎉 ${debt!.name} marked as paid off!` });
       load();
     } catch {
