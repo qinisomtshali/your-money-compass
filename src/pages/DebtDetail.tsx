@@ -13,7 +13,19 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { ArrowLeft, CreditCard, ShoppingBag, Building2, Car, Home, GraduationCap, HelpCircle, Banknote, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
+
+const fireConfetti = () => {
+  const duration = 3000;
+  const end = Date.now() + duration;
+  const colors = ['#22c55e', '#10b981', '#34d399', '#fbbf24', '#f59e0b'];
+  (function frame() {
+    confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors });
+    confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+};
 
 const debtNav = [
   { to: '/debts', label: 'Dashboard' },
