@@ -36,6 +36,10 @@ import DebtCreate from "./pages/DebtCreate";
 import DebtDetail from "./pages/DebtDetail";
 import DebtPayoff from "./pages/DebtPayoff";
 import DebtInsights from "./pages/DebtInsights";
+import RecurringBills from "./pages/RecurringBills";
+import BillCalendar from "./pages/BillCalendar";
+import UpcomingBills from "./pages/UpcomingBills";
+import PaydayPlanner from "./pages/PaydayPlanner";
 import NotFound from "./pages/NotFound";
 import AppTour from "./components/AppTour";
 import CommandPalette from "./components/CommandPalette";
@@ -95,6 +99,11 @@ const App = () => (
             <Route path="/debts/payoff" element={<ProtectedPage><DebtPayoff /></ProtectedPage>} />
             <Route path="/debts/insights" element={<ProtectedPage><DebtInsights /></ProtectedPage>} />
             <Route path="/debts/:id" element={<ProtectedPage><DebtDetail /></ProtectedPage>} />
+            {/* Recurring */}
+            <Route path="/recurring" element={<ProtectedPage><RecurringBills /></ProtectedPage>} />
+            <Route path="/recurring/calendar" element={<ProtectedPage><BillCalendar /></ProtectedPage>} />
+            <Route path="/recurring/upcoming" element={<ProtectedPage><UpcomingBills /></ProtectedPage>} />
+            <Route path="/recurring/payday" element={<ProtectedPage><PaydayPlanner /></ProtectedPage>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

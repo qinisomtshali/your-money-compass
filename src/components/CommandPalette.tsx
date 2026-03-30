@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/command';
 import {
   LayoutDashboard, ArrowLeftRight, Tag, PiggyBank, BarChart3, TrendingUp,
-  Coins, Calculator, FileText, Trophy, Medal, Target, Search, Flag,
+  Coins, Calculator, FileText, Trophy, Medal, Target, Search, Flag, Repeat,
 } from 'lucide-react';
 
 const routes = [
@@ -26,6 +26,10 @@ const routes = [
   { label: 'Debts', icon: Flag, path: '/debts', group: 'Finance' },
   { label: 'Payoff Calculator', icon: Flag, path: '/debts/payoff', group: 'Finance' },
   { label: 'Debt Insights', icon: Flag, path: '/debts/insights', group: 'Finance' },
+  { label: 'Bills & Recurring', icon: Repeat, path: '/recurring', group: 'Finance' },
+  { label: 'Bill Calendar', icon: Repeat, path: '/recurring/calendar', group: 'Finance' },
+  { label: 'Upcoming Bills', icon: Repeat, path: '/recurring/upcoming', group: 'Finance' },
+  { label: 'Payday Planner', icon: Repeat, path: '/recurring/payday', group: 'Finance' },
   { label: 'Stocks', icon: TrendingUp, path: '/stocks', group: 'Market & Tools' },
   { label: 'Stock Watchlist', icon: TrendingUp, path: '/stocks/watchlist', group: 'Market & Tools' },
   { label: 'Crypto', icon: Coins, path: '/crypto', group: 'Market & Tools' },
