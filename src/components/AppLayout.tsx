@@ -12,6 +12,7 @@ const financeItems = [
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/savings', label: 'Savings', icon: PiggyBank },
   { to: '/debts', label: 'Debts', icon: Flag },
+  { to: '/recurring', label: 'Bills & Recurring', icon: Repeat },
 ];
 
 const toolsItems = [
